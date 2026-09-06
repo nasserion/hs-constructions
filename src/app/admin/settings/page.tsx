@@ -27,6 +27,8 @@ export default function SettingsPage() {
   const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
   const [heroUploading, setHeroUploading] = useState(false);
   const [heroError, setHeroError] = useState<string | null>(null);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoError, setLogoError] = useState<string | null>(null);
 
   function refresh() {
     setSettings(db.settings.get());
@@ -122,6 +124,29 @@ export default function SettingsPage() {
     setSettings(updated);
   }
 
+  async function handleLogoUpload(file: File | undefined) {
+    if (!file || !settings) return;
+    setLogoError(null);
+    setLogoUploading(true);
+    try {
+      const dataUrl = await fileToCompressedDataUrl(file);
+      const updated = { ...settings, logoImage: dataUrl };
+      db.settings.set(updated);
+      setSettings(updated);
+    } catch {
+      setLogoError("Could not process that file. Try a different image.");
+    } finally {
+      setLogoUploading(false);
+    }
+  }
+
+  function removeLogoImage() {
+    if (!settings) return;
+    const updated = { ...settings, logoImage: undefined };
+    db.settings.set(updated);
+    setSettings(updated);
+  }
+
   if (!settings) return <div className="p-6 text-sm text-steel">Loading…</div>;
 
   return (
@@ -132,6 +157,58 @@ export default function SettingsPage() {
         {message && (
           <div className="border border-good/30 bg-good/5 text-good text-sm px-4 py-2.5 rounded-sm">{message}</div>
         )}
+
+        <section className="bg-white border border-line p-5">
+          <h2 className="font-display font-semibold text-xl mb-1 flex items-center gap-2">
+            <ImagePlus size={18} className="text-rust" /> Company logo
+          </h2>
+          <p className="text-sm text-steel mb-4 max-w-lg">
+            Upload your official logo to replace the text wordmark shown in the site header and
+            footer. Best results: a transparent-background PNG or SVG-exported PNG.
+          </p>
+          {logoError && (
+            <div className="border border-bad/40 bg-bad/5 text-bad text-sm px-4 py-2.5 rounded-sm mb-4">
+              {logoError}
+            </div>
+          )}
+          <div className="flex flex-col sm:flex-row gap-4 items-center">
+            <div className="relative w-40 h-20 bg-ink border border-line shrink-0 overflow-hidden flex items-center justify-center">
+              {settings.logoImage ? (
+                <Image src={settings.logoImage} alt="Logo preview" fill unoptimized className="object-contain p-2" />
+              ) : (
+                <span className="text-white font-display font-semibold text-lg">
+                  H S <span className="text-rust">CONSTRUCTIONS</span>
+                </span>
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="inline-flex items-center gap-2 text-sm font-medium border border-line px-4 py-2 rounded-sm cursor-pointer hover:border-rust hover:text-rust w-fit">
+                <ImagePlus size={15} />
+                {logoUploading ? "Uploading…" : settings.logoImage ? "Replace logo" : "Upload logo"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  disabled={logoUploading}
+                  onChange={(e) => handleLogoUpload(e.target.files?.[0])}
+                  className="hidden"
+                />
+              </label>
+              {settings.logoImage && (
+                <button
+                  onClick={removeLogoImage}
+                  className="inline-flex items-center gap-1.5 text-sm text-steel hover:text-bad w-fit"
+                >
+                  <X size={14} /> Remove logo, use text wordmark
+                </button>
+              )}
+            </div>
+          </div>
+          <p className="mt-4 text-xs text-steel leading-relaxed">
+            Note: this changes the header/footer logo only. Updating the browser tab icon
+            (favicon) currently requires replacing <code>src/app/favicon.ico</code> directly in
+            the code and rebuilding — ask if you&apos;d like help with that.
+          </p>
+        </section>
 
         <section className="bg-white border border-line p-5">
           <h2 className="font-display font-semibold text-xl mb-1 flex items-center gap-2">

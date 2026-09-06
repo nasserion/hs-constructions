@@ -231,4 +231,7 @@ export interface SiteSettings {
   // Compressed base64 data URL for the homepage hero background photo.
   // Falls back to the dark blueprint-grid background when unset.
   heroImage?: string;
+  // Compressed base64 data URL for the company logo. Falls back to the
+  // text wordmark ("H S CONSTRUCTIONS") when unset.
+  logoImage?: string;
 }

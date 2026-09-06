@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X, MessageCircle } from "lucide-react";
 import { clsx } from "clsx";
 import { Container } from "./Container";
+import { Logo } from "./Logo";
 import { LinkButton } from "../ui/Button";
 import { waLink } from "@/lib/business";
 
@@ -25,9 +26,7 @@ export function Navbar() {
     <header className="sticky top-0 z-40 bg-paper/95 backdrop-blur border-b border-line no-print">
       <Container className="flex items-center justify-between py-3">
         <Link href="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
-          <span className="font-display font-semibold text-2xl tracking-tight text-ink">
-            H S <span className="text-rust">CONSTRUCTIONS</span>
-          </span>
+          <Logo />
         </Link>
 
         <nav className="hidden lg:flex items-center gap-8">
